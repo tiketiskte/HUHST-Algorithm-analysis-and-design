@@ -24,75 +24,80 @@
 #define SZ(X) (int)X.size()
 #define INF 0x3f3f3f3f
 using namespace std;
-
-const int maxn = 26 + 5;
-struct Matrix{
-    int row, column;
-};
-int n, a, b;
-int main(void) {
-    Matrix qwq[maxn];
-    char name;
-    string ss;
-    while(cin >> n) {
-        while(n--) {
-            cin >> name >> a >> b;
-            qwq[name - 'A'].row = a;
-            qwq[name - 'A'].column = b;
+ 
+const int PRIME = 151;
+const ll MOD = 1e9 + 7;
+const int  MAXN = 1e3 + 5;
+const int INF = 0x3f3f3f3f;
+ 
+int n;
+string s;
+struct mat {
+    ll row, column;
+}ch[MAXN];
+ 
+int main () {
+    IOS()
+    while (cin >> n) {
+        int Max = -1;
+        for (int i = 1; i <= n; ++i) {
+            char c;
+            cin >> c;
+            cin >> ch[c - 'A'].row >> ch[c - 'A'].column;
+            Max = max(c - 'A', Max);
         }
-        getchar();
-        getline(cin, ss);
-        ll sum = 0;
-        deque <char> dq;
-        for(int i = 0; i < SZ(ss); i++) {
-            if(ss[i] != ')') {
-                dq.push_back(ss[i]);
-            } else {
-                string s;
-                while(dq.back() != '(') {
-                    s += dq.back();
-                    dq.pop_back();
+        cin >> s;
+ 
+        ll ans = 0;
+        bool f = false;
+        stack<int> stk;
+        for (int i = 0; i < s.length(); ++i) {
+            if (s[i] == '(') stk.push(-1);
+            else if (s[i] == ')') {
+                string tt;
+                while (stk.top() != -1) {
+                    tt += stk.top();
+                    stk.pop();
                 }
-                dq.pop_back();
-                for(int j = SZ(s) - 1; j > 0; j--) {
-                    int m1 = s[j] - 'A';  
-                    int m2 = s[j - 1] - 'A'; 
-                    if(qwq[m1].column != qwq[m2].row) {
-                        sum = -1;
-                        break;
-                    }
-                    sum += qwq[m1].row * qwq[m1].column * qwq[m2].column;
-                    qwq[m2].row = qwq[m1].row;
+                stk.pop(), reverse(tt.begin(), tt.end());
+                ll r = ch[tt[0]].row, c = ch[tt[0]].column;
+ 
+                for (int j = 0; j < tt.length() - 1; ++j) {
+                    ll tr = ch[tt[j + 1]].row;
+                    ll tc = ch[tt[j + 1]].column;
+                    if (tr != c) { f = true; break; }
+                    ans += c * r * tc;
+                    c = tc;
                 }
-                dq.push_back(s[0]);
-                if(sum == -1) {
-                    break;
-                }
+ 
+                ch[++Max].row = r, ch[Max].column = c;
+                stk.push(Max);
             }
+            else stk.push(s[i] - 'A');
+            if (f) break;
         }
-        if(sum != -1) {
-            string s;
-            while(dq.size()) {
-                s += dq.front();
-                dq.pop_front();
-            }
-            for(int j = 0; j < SZ(s) - 1; j++) {
-                int m1 = s[j] - 'A';
-                int m2 = s[j + 1] - 'A';
-                if(qwq[m1].column != qwq[m2].row) {
-                    sum = -1;
-                    break;
-                }
-                sum += qwq[m1].row * qwq[m1].column * qwq[m2].column;
-                qwq[m2].row = qwq[m1].row;
-            }
-            if(sum != -1) {
-                cout << sum << endl;
-                continue;
-            }
+ 
+        if (f) { cout << "error\n"; return 0; }
+ 
+        string tt;
+        while (! stk.empty()) {
+            tt += stk.top();
+            stk.pop();
         }
-        cout << "error" << endl;
+        reverse(tt.begin(), tt.end());
+        ll r = ch[tt[0]].row, c = ch[tt[0]].column;
+        for (int j = 0; j < tt.length() - 1; ++j) {
+            ll tr = ch[tt[j + 1]].row;
+            ll tc = ch[tt[j + 1]].column;
+            if (tr != c) { f = true; break; }
+            ans += c * r * tc;
+            c = tc;
+        }
+        if (f) { cout << "error\n"; return 0; }
+ 
+        cout << ans << '\n';
+ 
+        memset(ch, 0, sizeof(ch));
     }
-    // system("pause");
     return 0;
 }
